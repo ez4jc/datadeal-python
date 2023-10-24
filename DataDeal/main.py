@@ -1,9 +1,11 @@
 # main.py
-from DataDeal.data_receiver import receive_data
-from DataDeal.data_processor import convert_to_pointcloud
+from data_receiver import receive_data
+from data_receiver import socket_link
+from data_processor import convert_to_pointcloud
 import time
 import struct
 import numpy as np
+import open3d as o3d
 
 def bytesToFloat(h1,h2,h3,h4):
     ba = bytearray()
@@ -25,9 +27,10 @@ def main():
     L_dis = []
     H_dis = []
 
+    client_socket = socket_link()
 
     while True:
-        pkt_data = receive_data()
+        pkt_data = receive_data(client_socket)
         packet = list(pkt_data)  # 装进packet，header数据包头部信息，pkt_data数据包数据
 
         # 判断前12位和数据包总长度，确保数据包接收正确
@@ -71,17 +74,18 @@ def main():
 
 
         if packet is not None:
-            point_clouds = convert_to_pointcloud(R_dis, L_dis, H_dis)
-            for cloud in point_clouds:
-                # 将点云对象转换为 numpy 数组
-                points = cloud.to_array()
+            pcd = convert_to_pointcloud(R_dis, L_dis, H_dis)
 
-                # 打印每个点云对象的坐标
-                for point in points:
-                    x, y, z = point
-                    print(f"点云对象坐标：({x}, {y}, {z})")
+            # 打印每个点云对象的坐标
+            for point in pcd.points:
+                x, y, z = point
+                print(f"点云对象坐标：({x}, {y}, {z})")
+
         else:
             print("等待接收数据...")
+
+
+        o3d.io.write_point_cloud("F:/data/test2.pcd", pcd)
 
         time.sleep(1)  # 休眠1秒
 
