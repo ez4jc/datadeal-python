@@ -6,6 +6,7 @@ import time
 import struct
 import numpy as np
 import open3d as o3d
+import vtkmodules.all as vtk
 
 def bytesToFloat(h1,h2,h3,h4):
     ba = bytearray()
@@ -37,7 +38,8 @@ def main():
         if packet[0] == 0xFF and packet[1] == 0xFF and packet[2] == 0xFF \
                 and packet[3] == 0xFF and packet[4] == 0xFF and packet[5] == 0xFF \
                 and packet[6] == 0x48 and packet[7] == 0x5B and packet[8] == 0x39 \
-                and packet[9] == 0xC2 and packet[10] == 0x7D and packet[11] == 0xF8:
+                and packet[9] == 0xC2 and packet[10] == 0x7D and packet[11] == 0xF8 \
+                and len(pkt_data) == 16640:
 
             # 避免错位
             if packet[14] == 0:
@@ -72,20 +74,30 @@ def main():
                 L_dis = R_cal * np.sin(P_cal)
                 H_dis = H_cal
 
+                point_cloud = convert_to_pointcloud(R_dis, L_dis, H_dis)
 
-        if packet is not None:
-            pcd = convert_to_pointcloud(R_dis, L_dis, H_dis)
+                # 打印每个点云对象的坐标
+                # for point in pcd.points:
+                #     x, y, z = point
+                #     print(f"点云对象坐标：({x}, {y}, {z})")
 
-            # 打印每个点云对象的坐标
-            for point in pcd.points:
-                x, y, z = point
-                print(f"点云对象坐标：({x}, {y}, {z})")
+                points = point_cloud.GetPoints()
+                num_points = points.GetNumberOfPoints()
+
+                for i in range(num_points):
+                    x, y, z = points.GetPoint(i)
+                    print(f"点云对象坐标：({x}, {y}, {z})")
+
+                #o3d.io.write_point_cloud("F:/data/test.pcd", pcd)
+                writer = vtk.vtkPLYWriter()
+                writer.SetFileName("F:/data/test.ply")
+                writer.SetInputData(point_cloud)
+                writer.SetFileTypeToASCII()
+                writer.Write()
 
         else:
             print("等待接收数据...")
 
-
-        o3d.io.write_point_cloud("F:/data/test2.pcd", pcd)
 
         time.sleep(1)  # 休眠1秒
 
