@@ -4,25 +4,20 @@
 
 ## 功能简介
 
-将发送端的数据转换成点云
+将发送端的数据转换成点云文件
 
 ## 返回类型
 
-点云对象，pcl.PointCloud
-
-```
-pcl._pcl.PointCloud.PointCloud def __init__(self,
-             *args: Any,
-             **kwargs: Any) -> None
-```
+点云文件，ply格式
 
 ## 库
 
-- [x] pcl（python3.6）
+- [x] struct
 - [x] numpy
-- [x] math
+- [x] open3d
 - [x] socket
 - [x] time
+- [x] vtk
 
 ## 软件日志
 
@@ -33,4 +28,5 @@ pcl._pcl.PointCloud.PointCloud def __init__(self,
 | 10.24 |     套接字函数修改，返回值改为点云文件     |
 | 10.27 |       套接字连接放循环外部，节省资源       |
 | 10.31 |   优化逻辑，增加头部校验，数据有误则等待   |
+| 11.3  |      优化结构，改为线程方法，方便调用      |
 
